@@ -49,14 +49,14 @@ spec:
               name: aws-credentials
               key: AWS_SESSION_TOKEN
         - name: AVRO_SCHEMA_PATH
-          value: "/scada.json"  # Root path for Avro schema
+          value: "/scada.json"  
         volumeMounts:
         - name: connector-config
           mountPath: /etc/kafka/connect-configs
           readOnly: true
         - name: avro-schema
           mountPath: /scada.json
-          subPath: scada.json  # Ensure scada.json is mounted at root level
+          subPath: scada.json  
           readOnly: true
       volumes:
       - name: connector-config
