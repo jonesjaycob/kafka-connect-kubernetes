@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jaycob-kafka-connect
+  namespace: connect
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jaycob-kafka-connect
+  template:
+    metadata:
+      labels:
+        app: jaycob-kafka-connect
+    spec:
+      containers:
+      - name: kafka-connect
+        image: jaycobjones/kafka-connect-aws-datagen-on-prem-mqtt:01b31f0a39d6a376bef6b0367ef736fe81f1ae3e
+        ports:
+        - containerPort: 8083
+        - containerPort: 7073
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1500m"
+        env:
+        - name: ENVIRONMENT
+          value: "dev"
+        - name: KAFKA_CONNECT_LOG4J_ROOT_LOGLEVEL
+          value: "WARN"
+        - name: BROKERS
+          value: "b-2-public.testcluster2.65grj0.c6.kafka.us-west-2.amazonaws.com:9198,b-3-public.testcluster2.65grj0.c6.kafka.us-west-2.amazonaws.com:9198,b-1-public.testcluster2.65grj0.c6.kafka.us-west-2.amazonaws.com:9198"
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_SESSION_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: AWS_SESSION_TOKEN
+        - name: AVRO_SCHEMA_PATH
+          value: "/scada.json"  # Root path for Avro schema
+        volumeMounts:
+        - name: connector-config
+          mountPath: /etc/kafka/connect-configs
+          readOnly: true
+        - name: avro-schema
+          mountPath: /scada.json
+          subPath: scada.json  # Ensure scada.json is mounted at root level
+          readOnly: true
+      volumes:
+      - name: connector-config
+        configMap:
+          name: mqtt-connector-config
+      - name: avro-schema
+        configMap:
+          name: avro-schema-config

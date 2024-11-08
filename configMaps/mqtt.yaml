@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mqtt-connector-config
+  namespace: connect
+data:
+  mqtt-connector-config.json: |
+    {
+      "name": "on-prem-mqtt",
+      "config": {
+        "connector.class": "io.lenses.streamreactor.connect.mqtt.source.MqttSourceConnector",
+        "tasks.max": "1",
+        "connect.mqtt.hosts": "tcp://<update_host>:1883",
+        "connect.mqtt.client.id": "kubernetes",
+        "connect.mqtt.service.quality": "1",
+        "connect.mqtt.connection.clean": "true",
+        "connect.mqtt.connection.timeout": "1000",
+        "connect.mqtt.connection.keep.alive": "1000",
+        "connect.mqtt.kcql": "INSERT INTO sparkplug_kafka_topic SELECT * FROM spBv1.0/PENA-NV/DDATA/SCALE/+",
+        "connect.mqtt.source.converters": "spBv1.0/PENA-NV/DDATA/SCALE=io.lenses.streamreactor.connect.converters.source.AvroConverter",
+        "connect.source.converter.avro.schemas": "spBv1.0/PENA-NV/DDATA/SCALE=/scada.json",
+        "connect.mqtt.username": "<update_username>",
+        "connect.mqtt.password": "<update_password>",
+        "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+        "value.converter": "org.apache.kafka.connect.storage.StringConverter",
+        "connect.mqtt.converter.throw.on.error": "true"
+      }
+    }
